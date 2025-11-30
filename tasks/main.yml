@@ -1,0 +1,22 @@
+---
+- name: Download Vector deb package
+  ansible.builtin.get_url:
+    url: "{{ vector_download_url }}"
+    dest: "{{ vector_deb_path }}"
+    mode: '0644'
+
+- name: Install Vector from deb
+  ansible.builtin.apt:
+    deb: "{{ vector_deb_path }}"
+    state: present
+
+- name: Cleanup deb package
+  ansible.builtin.file:
+    path: "{{ vector_deb_path }}"
+    state: absent
+
+- name: Start and enable Vector service
+  ansible.builtin.systemd:
+    name: "{{ vector_service_name }}"
+    state: started
+    enabled: true

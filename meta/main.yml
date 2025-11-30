@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: Ansible Course Student
+  description: Ansible role for installing and configuring Vector observability data pipeline
+  company: Netology
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+  galaxy_tags:
+    - vector
+    - observability
+    - logging
+    - monitoring
+
+dependencies: []
