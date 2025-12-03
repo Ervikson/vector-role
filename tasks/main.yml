@@ -1,19 +1,42 @@
 ---
-- name: Download Vector deb package
+- name: Download Vector package for Debian/Ubuntu
   ansible.builtin.get_url:
-    url: "{{ vector_download_url }}"
+    url: "{{ vector_deb_url }}"
     dest: "{{ vector_deb_path }}"
     mode: '0644'
+  when: ansible_facts['os_family'] == "Debian"
 
-- name: Install Vector from deb
+- name: Download Vector package for RedHat/OracleLinux
+  ansible.builtin.get_url:
+    url: "{{ vector_rpm_url }}"
+    dest: "{{ vector_rpm_path }}"
+    mode: '0644'
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Install Vector from deb package
   ansible.builtin.apt:
     deb: "{{ vector_deb_path }}"
     state: present
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install Vector from rpm package
+  ansible.builtin.yum:
+    name: "{{ vector_rpm_path }}"
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Cleanup deb package
   ansible.builtin.file:
     path: "{{ vector_deb_path }}"
     state: absent
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Cleanup rpm package
+  ansible.builtin.file:
+    path: "{{ vector_rpm_path }}"
+    state: absent
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Start and enable Vector service
   ansible.builtin.systemd:

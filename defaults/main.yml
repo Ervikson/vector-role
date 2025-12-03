@@ -2,11 +2,13 @@
 # Vector version
 vector_version: "0.51.1"
 
-# Vector download URL
-vector_download_url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_amd64.deb"
+# Vector download URLs (will be selected based on OS family)
+vector_deb_url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_amd64.deb"
+vector_rpm_url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1.x86_64.rpm"
 
-# Path to downloaded deb package
+# Path to downloaded packages
 vector_deb_path: /tmp/vector.deb
+vector_rpm_path: /tmp/vector.rpm
 
 # Vector service name
 vector_service_name: vector

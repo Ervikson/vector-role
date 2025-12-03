@@ -1,0 +1,72 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Check that Vector service is running
+      ansible.builtin.systemd:
+        name: "{{ vector_service_name }}"
+      register: vector_service_status
+
+    - name: Assert Vector service is active and enabled
+      ansible.builtin.assert:
+        that:
+          - vector_service_status.status.ActiveState == "active"
+          - vector_service_status.status.UnitFileState == "enabled"
+        fail_msg: "Vector service is not running or not enabled"
+        success_msg: "Vector service is running and enabled"
+
+    - name: Check Vector version
+      ansible.builtin.command: vector --version
+      register: vector_version_output
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Vector is installed and version matches
+      ansible.builtin.assert:
+        that:
+          - vector_version_output.rc == 0
+          - vector_version_output.stdout is defined
+          - "'{{ vector_version }}' in vector_version_output.stdout"
+        fail_msg: "Vector version check failed or version mismatch"
+        success_msg: "Vector version is correct"
+
+    - name: Check Vector configuration file exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.toml
+      register: vector_config_file
+
+    - name: Assert Vector configuration file exists
+      ansible.builtin.assert:
+        that:
+          - vector_config_file.stat.exists
+        fail_msg: "Vector configuration file does not exist"
+        success_msg: "Vector configuration file exists"
+
+    - name: Validate Vector configuration
+      ansible.builtin.command: vector validate --no-environment --config-dir /etc/vector
+      register: vector_config_validate
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Vector configuration is valid
+      ansible.builtin.assert:
+        that:
+          - vector_config_validate.rc == 0
+        fail_msg: "Vector configuration validation failed: {{ vector_config_validate.stderr | default(vector_config_validate.stdout) }}"
+        success_msg: "Vector configuration is valid"
+
+    - name: Check Vector process is running
+      ansible.builtin.command: pgrep -f vector
+      register: vector_process
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Vector process is running
+      ansible.builtin.assert:
+        that:
+          - vector_process.rc == 0
+          - vector_process.stdout | length > 0
+        fail_msg: "Vector process is not running"
+        success_msg: "Vector process is running"
